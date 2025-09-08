@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../../../../media/deadmaster/New Volume/NLBS Data"
+		}
+	],
+	"settings": {
+		"codium.codeCompletion.enable": true
+	}
+}

@@ -1,0 +1,156 @@
+# NLBS-CVAE Training Configuration
+# Conditional VAE for FFDM Mammographic Image Generation
+
+# Project Configuration
+project:
+  name: "nlbs-cvae"
+  experiment_id: "cvae_mammo_v1"
+  description: "Conditional VAE for mammographic image generation"
+  seed: 42
+
+# Data Configuration
+data:
+  # Dataset paths
+  csv_path: "/media/deadmaster/New Volume/NLBS Data/NLBSP-metadata.csv"
+  image_dir: "/media/deadmaster/New Volume/NLBS Data"
+  
+  # Data splits (patient-wise)
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Image processing
+  resolution: 256
+  channels: 1  # Grayscale mammograms
+  patch_stride: 256
+  
+  # Augmentation
+  augmentation:
+    lr_flip_prob: 0.5
+    rotation_range: 10  # degrees
+    contrast_jitter: 0.1
+    gaussian_noise: 0.01
+  
+  # Filtering
+  min_foreground_frac: 0.2
+  batch_size: 16
+  num_workers: 8
+
+# Model Architecture
+model:
+  # VAE dimensions
+  latent_dim: 256
+  condition_dim: 14  # view(2) + laterality(2) + age_embed(8) + cancer(1) + false_pos(1)
+  condition_embed_dim: 128
+  
+  # Encoder
+  encoder:
+    channels: [64, 128, 256, 512]
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+  
+  # Decoder
+  decoder:
+    channels: [512, 256, 128, 64, 1]
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    output_padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+    use_skip_connections: true
+  
+  # Conditioning
+  conditioning:
+    method: "film"  # FiLM modulation
+    spatial_injection: true
+    posterior_bias: true
+
+# Training Configuration
+training:
+  # Optimization
+  optimizer: "adam"
+  learning_rate: 1e-4
+  weight_decay: 1e-5
+  beta1: 0.9
+  beta2: 0.999
+  
+  # Scheduler
+  scheduler: "cosine"
+  warmup_epochs: 5
+  min_lr: 1e-6
+  
+  # Training duration
+  num_epochs: 100
+  max_steps: null  # null = use num_epochs
+  
+  # Loss weights
+  loss:
+    reconstruction_weight: 1.0
+    kl_weight: 1.0  # Will be annealed from 0 to 1
+    edge_weight: 0.1
+    kl_anneal_epochs: 20
+  
+  # Regularization
+  gradient_clip: 1.0
+  mixed_precision: "fp16"
+  
+  # Checkpointing
+  save_every_n_epochs: 5
+  save_best: true
+  early_stopping_patience: 15
+
+# Evaluation Configuration
+evaluation:
+  # Metrics
+  metrics:
+    - "fid"
+    - "ssim"
+    - "psnr"
+    - "lpips"
+  
+  # Validation
+  val_every_n_epochs: 2
+  num_val_samples: 100
+  
+  # Testing
+  test_after_training: true
+  num_test_samples: 1000
+  
+  # Clinical evaluation
+  clinical_eval: true
+  classifier_path: null  # Path to pre-trained classifier for downstream evaluation
+
+# Logging and Monitoring
+logging:
+  # TensorBoard
+  use_tensorboard: true
+  log_dir: "results/logs"
+  
+  # WandB
+  use_wandb: false
+  wandb_project: "nlbs-cvae"
+  wandb_entity: null
+  
+  # Console
+  log_every_n_steps: 100
+  save_images_every_n_epochs: 5
+
+# Hardware Configuration
+hardware:
+  device: "cpu"  # auto, cuda, cpu
+  num_gpus: 1
+  mixed_precision: true
+  gradient_accumulation_steps: 1
+  
+# Output Configuration
+output:
+  results_dir: "results"
+  checkpoints_dir: "results/checkpoints"
+  galleries_dir: "results/galleries"
+  metrics_file: "results/metrics.csv"

@@ -1,0 +1,142 @@
+# HPC-Optimized Training Configuration for NLBS-CVAE
+# Designed for GPU clusters with high memory and compute
+
+# Project Information
+project:
+  name: "nlbs-cvae"
+  description: "Conditional VAE for mammography generation - HPC version"
+  seed: 42
+
+# Data Configuration - UPDATE THESE PATHS FOR YOUR HPC
+data:
+  # Data paths - CHANGE THESE TO YOUR HPC PATHS
+  csv_path: "/home/user156/NLBS Data/NLBSP-metadata.csv"
+  image_dir: "/home/user156/NLBS Data/images"
+  
+  # Data splits
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Image processing - Optimized for HPC
+  resolution: 256  # Start with 256, can increase to 512 later
+  channels: 1
+  patch_stride: 256
+  
+  # Augmentation
+  augmentation:
+    lr_flip_prob: 0.5
+    rotation_range: 10
+    contrast_jitter: 0.1
+    gaussian_noise: 0.01
+  
+  # Filtering
+  min_foreground_frac: 0.2
+  
+  # HPC-optimized batch settings
+  batch_size: 32  # Larger batch for HPC GPUs
+  num_workers: 8  # Match SLURM cpus-per-task
+
+# Model Architecture
+model:
+  # VAE dimensions
+  latent_dim: 256
+  condition_dim: 14
+  condition_embed_dim: 128
+  
+  # Encoder - Optimized for HPC
+  encoder:
+    channels: [64, 128, 256, 512]
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+  
+  # Decoder
+  decoder:
+    channels: [512, 256, 128, 64, 1]
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    output_padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+    use_skip_connections: true
+  
+  # Conditioning
+  conditioning:
+    method: "film"
+    spatial_injection: true
+    posterior_bias: true
+
+# Training Configuration - HPC Optimized
+training:
+  # Optimization
+  optimizer: "adam"
+  learning_rate: 2e-4  # Slightly higher for larger batches
+  weight_decay: 1e-5
+  beta1: 0.9
+  beta2: 0.999
+  
+  # Scheduler
+  scheduler: "cosine"
+  warmup_epochs: 10  # More warmup for stability
+  min_lr: 1e-6
+  
+  # Training duration - HPC suitable
+  num_epochs: 200  # More epochs for HPC
+  max_steps: null
+  
+  # Loss weights
+  loss:
+    reconstruction_weight: 1.0
+    kl_weight: 1.0
+    edge_weight: 0.1
+    kl_anneal_epochs: 30  # Longer annealing
+  
+  # Regularization
+  gradient_clip: 1.0
+  
+  # Mixed precision for HPC efficiency
+  use_amp: true
+  
+# Evaluation Configuration
+evaluation:
+  val_every_n_epochs: 5  # Less frequent validation
+  num_val_samples: 16
+  
+  # Metrics
+  compute_fid: true
+  compute_ssim: true
+  compute_psnr: true
+  compute_lpips: true
+
+# Logging Configuration - HPC Friendly
+logging:
+  log_every_n_steps: 100  # Less frequent logging
+  save_images_every_n_epochs: 10
+  num_sample_images: 8
+  
+  # Weights & Biases (optional)
+  use_wandb: false
+  wandb_project: "nlbs-cvae"
+  wandb_entity: "your-username"
+
+# Hardware Configuration
+hardware:
+  device: "cuda"  # Use GPU on HPC
+  mixed_precision: true
+  compile_model: false  # Disable for compatibility
+
+# Output Configuration - HPC Paths
+output:
+  results_dir: "/home/user156/nlbs-cvae-results"  # CHANGE THIS
+  save_every_n_epochs: 20
+  keep_last_n_checkpoints: 5
+  
+  # Checkpoint settings
+  save_optimizer_state: true
+  save_scheduler_state: true

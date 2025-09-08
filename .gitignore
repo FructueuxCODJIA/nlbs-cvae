@@ -1,0 +1,129 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Training results and large files
+results/galleries/
+results/logs/
+*.pth
+*.pt
+*.h5
+*.dat
+*.pkl
+*.pickle
+*.npy
+*.npz
+*.joblib
+checkpoints/
+wandb/
+mlruns/
+.tensorboard/
+tensorboard_logs/
+
+# Large data files (if any)
+data/raw/
+data/processed/
+*.csv
+*.tsv
+*.json
+*.xml
+*.parquet
+*.feather
+*.hdf5
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment and configuration
+.env
+.env.local
+.env.*.local
+config.ini
+secrets.json
+
+# Cache directories
+.cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Exclude the miniconda installer
+miniconda_installer.exe
+
+# Exclude detailed tree documentation (can be regenerated)
+ARBORESCENCE_COMPLETE.md
+DETAILED_TREE.md
+
+# HPC specific files (not needed for Colab)
+setup_hpc.sh
+setup_hpc_offline.sh
+setup_asuka.sh
+setup_asuka_custom.sh
+check_hpc_environment.sh
+check_hpc_readiness.sh
+transfer_to_hpc.sh
+transfer_to_asuka.sh
+download_results.sh
+monitor_hpc.sh
+train_job.slurm
+train_asuka.slurm
+requirements_hpc.txt
