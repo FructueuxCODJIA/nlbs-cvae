@@ -2,7 +2,7 @@
 
 A sophisticated deep learning project for generating high-quality Full-Field Digital Mammograms (FFDM) based on clinical conditions using Conditional Variational Autoencoders.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Installation
 ```bash
@@ -246,3 +246,4 @@ This project is part of the MammoGen research initiative for advancing mammograp
 2. Update configuration paths
 3. Start training: `python training/train_cvae.py`
 4. Monitor with TensorBoard: `tensorboard --logdir results/logs`
+
