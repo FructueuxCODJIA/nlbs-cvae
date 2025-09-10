@@ -83,7 +83,11 @@ data/processed/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
-*.ipynb
+# *.ipynb  # Commented out to allow Colab notebooks
+
+# Google Colab specific
+/content/
+.colab_metadata
 
 # Environment and configuration
 .env

@@ -1,0 +1,189 @@
+# NLBS-CVAE Configuration for Real NLBSP Dataset on Google Colab
+# Optimized for your actual mammography data
+
+project:
+  name: "NLBS-CVAE-RealData"
+  experiment_id: "colab_nlbsp_experiment"
+  description: "NLBS-CVAE training on real NLBSP mammography dataset in Google Colab"
+
+# Data configuration for your specific dataset
+data:
+  # Update these paths when you upload your data to Colab
+  csv_path: "/content/data/NLBSP-metadata.csv"  # Your metadata file
+  image_dir: "/content/data/images"  # Directory containing your DICOM files
+  
+  # Data processing
+  channels: 1  # Grayscale mammograms
+  resolution: 256  # Increased from 128 for better quality with real data
+  batch_size: 4  # Reduced for larger images and Colab memory constraints
+  num_workers: 2
+  pin_memory: true
+  
+  # Data splits
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Augmentation (conservative for medical images)
+  augmentation:
+    horizontal_flip: 0.5  # Only horizontal flip for mammograms
+    rotation: 5  # Small rotation
+    brightness: 0.1
+    contrast: 0.1
+    normalize: true
+    
+  # Age binning (based on your data range: 50-79)
+  age_bins: [50, 60, 70, 80]  # Creates 4 age groups
+  
+  # Column mapping for your CSV
+  column_mapping:
+    file_path: "File Path"
+    laterality: "Image Laterality"
+    view: "View Position"
+    age: "Age"
+    cancer: "Cancer"
+    false_positive: "False Positive"
+
+# Model architecture (optimized for Colab)
+model:
+  latent_dim: 256  # Increased for real data complexity
+  condition_embed_dim: 64
+  
+  # Encoder configuration
+  encoder:
+    channels: [32, 64, 128, 256, 512]  # Progressive channel increase
+    kernel_size: 4
+    stride: 2
+    padding: 1
+    activation: "leaky_relu"
+    dropout: 0.1
+    batch_norm: true
+  
+  # Decoder configuration
+  decoder:
+    channels: [512, 256, 128, 64, 32]  # Mirror of encoder
+    kernel_size: 4
+    stride: 2
+    padding: 1
+    activation: "relu"
+    dropout: 0.1
+    batch_norm: true
+    final_activation: "sigmoid"
+
+# Training configuration
+training:
+  num_epochs: 100  # More epochs for real data
+  learning_rate: 0.0002
+  beta1: 0.5
+  beta2: 0.999
+  weight_decay: 1e-5
+  
+  # Loss weights
+  reconstruction_weight: 1.0
+  kl_weight: 0.001  # Lower KL weight for better reconstruction
+  
+  # Learning rate scheduling
+  scheduler:
+    type: "cosine"
+    T_max: 100
+    eta_min: 1e-6
+  
+  # Mixed precision for memory efficiency
+  mixed_precision: true
+  gradient_clip: 1.0
+  
+  # Validation and checkpointing
+  val_every: 2  # Validate every 2 epochs
+  save_every: 5  # Save checkpoint every 5 epochs
+  early_stopping:
+    patience: 15
+    min_delta: 0.001
+
+# Hardware configuration for Colab
+hardware:
+  device: "cuda"  # Will fallback to CPU if no GPU
+  num_gpus: 1
+  
+  # Memory management for Colab
+  memory_management:
+    clear_cache_every: 5  # Clear GPU cache every 5 epochs
+    gradient_accumulation_steps: 2  # Accumulate gradients to simulate larger batch
+    max_memory_usage: 0.9  # Use up to 90% of available GPU memory
+
+# Logging and monitoring
+logging:
+  log_dir: "/content/results/logs"
+  tensorboard: true
+  wandb: false  # Disabled for Colab simplicity
+  log_every: 50  # Log every 50 steps
+  
+  # What to log
+  log_images: true
+  log_gradients: false  # Disabled to save memory
+  log_weights: false
+  
+  # Image logging
+  num_samples_to_log: 8
+  log_reconstruction: true
+  log_generation: true
+
+# Evaluation configuration
+evaluation:
+  metrics:
+    - "fid"  # Fréchet Inception Distance
+    - "lpips"  # Learned Perceptual Image Patch Similarity
+    - "mse"  # Mean Squared Error
+    - "ssim"  # Structural Similarity Index
+  
+  # Generation settings for evaluation
+  num_samples: 100
+  batch_size: 10
+
+# Output configuration
+output:
+  results_dir: "/content/results"
+  checkpoints_dir: "/content/results/checkpoints"
+  galleries_dir: "/content/results/galleries"
+  
+  # Backup to Google Drive
+  backup_to_drive: true
+  drive_backup_dir: "/content/drive/MyDrive/NLBS_CVAE_Results"
+  
+  # What to save
+  save_model: true
+  save_optimizer: true
+  save_config: true
+  save_samples: true
+  
+  # Gallery generation
+  gallery:
+    generate_every: 10  # Generate gallery every 10 epochs
+    samples_per_condition: 4
+    conditions_to_show:
+      - {view: "CC", laterality: "L", cancer: 0}
+      - {view: "CC", laterality: "L", cancer: 1}
+      - {view: "CC", laterality: "R", cancer: 0}
+      - {view: "CC", laterality: "R", cancer: 1}
+      - {view: "MLO", laterality: "L", cancer: 0}
+      - {view: "MLO", laterality: "L", cancer: 1}
+      - {view: "MLO", laterality: "R", cancer: 0}
+      - {view: "MLO", laterality: "R", cancer: 1}
+
+# Colab-specific settings
+colab:
+  # Session management
+  session_timeout_hours: 12  # Colab free tier limit
+  checkpoint_frequency: 2  # Save every 2 epochs due to session limits
+  
+  # Data upload options
+  data_source: "upload"  # Options: "upload", "drive", "url"
+  
+  # Resource monitoring
+  monitor_resources: true
+  memory_alert_threshold: 0.85
+  
+  # Automatic backup
+  auto_backup_frequency: 10  # Backup every 10 epochs
+  
+  # Demo mode (for testing without real data)
+  demo_mode: false  # Set to true to use synthetic data instead

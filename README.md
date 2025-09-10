@@ -4,6 +4,19 @@ A sophisticated deep learning project for generating high-quality Full-Field Dig
 
 ## Quick Start
 
+### 🌟 Google Colab (Recommended for beginners)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/FructueuxCODJIA/nlbs-cvae/blob/main/colab/notebooks/NLBS_CVAE_Training.ipynb)
+
+**Perfect for experimentation and learning!**
+- No local setup required
+- Free GPU access
+- Automatic environment setup
+- Interactive training and generation
+
+👉 **[See Colab Guide](colab/README.md)** for detailed instructions.
+
+### 🖥️ Local/HPC Installation
+
 ### 1. Installation
 ```bash
 # Clone the repository (if not already done)

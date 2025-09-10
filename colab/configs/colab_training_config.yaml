@@ -1,0 +1,169 @@
+# NLBS-CVAE Colab Training Configuration
+# Optimized for Google Colab environment
+
+# Project Configuration
+project:
+  name: "nlbs-cvae-colab"
+  experiment_id: "cvae_mammo_colab_v1"
+  description: "Conditional VAE for mammographic image generation - Colab version"
+  seed: 42
+
+# Data Configuration
+data:
+  # Colab data paths (will be set dynamically)
+  csv_path: "/content/data/metadata.csv"
+  image_dir: "/content/data/images"
+  
+  # Data splits (patient-wise)
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Image processing (optimized for Colab memory)
+  resolution: 128  # Reduced from 256 for faster training
+  channels: 1
+  patch_stride: 128
+  
+  # Augmentation
+  augmentation:
+    lr_flip_prob: 0.5
+    rotation_range: 10
+    contrast_jitter: 0.1
+    gaussian_noise: 0.01
+  
+  # Filtering
+  min_foreground_frac: 0.2
+  batch_size: 8  # Reduced for Colab memory constraints
+  num_workers: 2  # Colab has limited CPU cores
+
+# Model Architecture (slightly reduced for Colab)
+model:
+  # VAE dimensions
+  latent_dim: 128  # Reduced from 256
+  condition_dim: 14
+  condition_embed_dim: 64  # Reduced from 128
+  
+  # Encoder
+  encoder:
+    channels: [32, 64, 128, 256]  # Reduced from [64, 128, 256, 512]
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+  
+  # Decoder
+  decoder:
+    channels: [256, 128, 64, 32, 1]  # Adjusted accordingly
+    kernel_size: 3
+    stride: 2
+    padding: 1
+    output_padding: 1
+    use_group_norm: true
+    groups: 8
+    activation: "silu"
+    use_skip_connections: true
+  
+  # Conditioning
+  conditioning:
+    method: "film"
+    spatial_injection: true
+    posterior_bias: true
+
+# Training Configuration (optimized for Colab)
+training:
+  # Optimization
+  optimizer: "adam"
+  learning_rate: 2e-4  # Slightly higher for faster convergence
+  weight_decay: 1e-5
+  beta1: 0.9
+  beta2: 0.999
+  
+  # Scheduler
+  scheduler: "cosine"
+  warmup_epochs: 2  # Reduced from 5
+  min_lr: 1e-6
+  
+  # Training duration (shorter for Colab sessions)
+  num_epochs: 50  # Reduced from 100
+  max_steps: null
+  
+  # Loss weights
+  loss:
+    reconstruction_weight: 1.0
+    kl_weight: 1.0
+    edge_weight: 0.1
+    kl_anneal_epochs: 10  # Reduced from 20
+  
+  # Regularization
+  gradient_clip: 1.0
+  mixed_precision: "fp16"  # Important for Colab GPU memory
+  
+  # Checkpointing (more frequent for session management)
+  save_every_n_epochs: 2  # More frequent saves
+  save_best: true
+  early_stopping_patience: 8  # Reduced from 15
+
+# Evaluation Configuration
+evaluation:
+  # Metrics
+  metrics:
+    - "ssim"
+    - "psnr"
+    # - "fid"  # Commented out as it's memory intensive
+    # - "lpips"  # Commented out as it's memory intensive
+  
+  # Validation
+  val_every_n_epochs: 2
+  num_val_samples: 50  # Reduced from 100
+  
+  # Testing
+  test_after_training: true
+  num_test_samples: 100  # Reduced from 1000
+  
+  # Clinical evaluation
+  clinical_eval: false  # Disabled for Colab simplicity
+
+# Logging and Monitoring
+logging:
+  # TensorBoard
+  use_tensorboard: true
+  log_dir: "/content/results/logs"
+  
+  # WandB (optional)
+  use_wandb: false
+  wandb_project: "nlbs-cvae-colab"
+  wandb_entity: null
+  
+  # Console
+  log_every_n_steps: 50  # More frequent logging
+  save_images_every_n_epochs: 2  # More frequent image saves
+
+# Hardware Configuration (Colab-specific)
+hardware:
+  device: "auto"  # Will detect GPU automatically
+  num_gpus: 1
+  mixed_precision: true
+  gradient_accumulation_steps: 2  # To simulate larger batch size
+  
+# Output Configuration
+output:
+  results_dir: "/content/results"
+  checkpoints_dir: "/content/results/checkpoints"
+  galleries_dir: "/content/results/galleries"
+  metrics_file: "/content/results/metrics.csv"
+
+# Colab-specific settings
+colab:
+  # Data management
+  use_drive_mount: true
+  drive_data_path: "/content/drive/MyDrive/NLBS_Data"
+  
+  # Session management
+  auto_save_interval: 300  # seconds
+  checkpoint_to_drive: true
+  
+  # Memory management
+  clear_cache_every_n_epochs: 5
+  enable_memory_monitoring: true
