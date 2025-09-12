@@ -256,7 +256,7 @@ class MammographyDataset(Dataset):
                 raise ValueError(f"No patches available for index {idx}. Check patch creation.")
             patch_data = self.patches[idx]
             image = patch_data['image']
-            metadata = patch_data['metadata'].to_dict() if isinstance(patch_data['metadata'], pd.Series
+            metadata = patch_data['metadata'].to_dict() if isinstance(patch_data['metadata'], pd.Series) else patch_data['metadata']
 
         else:
             if not len(self.metadata):
